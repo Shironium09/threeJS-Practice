@@ -4,6 +4,7 @@ import { OrbitControls } from 'three/examples/jsm/Addons.js';
 import starBackground from './assets/star_background.png';
 
 const earthTexture = new THREE.TextureLoader().load('https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/WorldMap-A_non-Frame.png/1280px-WorldMap-A_non-Frame.png');
+const sunTexture = new THREE.TextureLoader().load('https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/The_Sun_by_the_Atacama_Large_Millimeter_Array.jpg/1280px-The_Sun_by_the_Atacama_Large_Millimeter_Array.jpg');
 
 const scene = new THREE.Scene();
 
@@ -20,12 +21,6 @@ renderer.setPixelRatio( window.devicePixelRatio );
 renderer.setSize(window.innerWidth, window.innerHeight);
 camera.position.setZ(30);
 
-const geometry = new THREE.SphereGeometry(10, 32, 32);
-const material = new THREE.MeshStandardMaterial( { map: earthTexture } );
-const earth = new THREE.Mesh(geometry, material);
-
-scene.add(earth);
-
 const pointLight = new THREE.PointLight(0xffffff);
 pointLight.position.set(5, 5, 5);
 
@@ -34,28 +29,70 @@ const ambientLight = new THREE.AmbientLight(0xffffff);
 scene.add(pointLight, ambientLight);
 
 // const lightHelper = new THREE.PointLightHelper(pointLight);
-// const gridHelper = new THREE.GridHelper(200, 50);
-// scene.add(lightHelper, gridHelper);
+const gridHelper = new THREE.GridHelper(200, 50);
+scene.add(gridHelper);
 
 const controls = new OrbitControls(camera, renderer.domElement);
 
-function addStar(){
+//Rendering of objects start here
 
-    const geometry = new THREE.SphereGeometry(0.25, 24, 24);
-    const material = new THREE.MeshStandardMaterial( { color: 0xffffff })
-    const star = new THREE.Mesh(geometry, material);
+let earth;
+let sun;
 
-    const [x, y, z] = Array(3).fill().map(() => THREE.MathUtils.randFloatSpread( 100 ));
+function renderSun(){
 
-    star.position.set(x, y, z);
-    scene.add(star);
+    const geometry = new THREE.SphereGeometry(10, 32, 32);
+    const material = new THREE.MeshStandardMaterial( { map: sunTexture } );
+    sun = new THREE.Mesh(geometry, material);
+    sun.position.set(0, 0, 0);
+
+    scene.add(sun);
 
 }
 
-Array(200).fill().forEach(addStar);
+function renderEarth(){
 
-const background = new THREE.TextureLoader().load(starBackground);
-scene.background = background;
+    const geometry = new THREE.SphereGeometry(10, 32, 32);
+    const material = new THREE.MeshStandardMaterial( { map: earthTexture } );
+    earth = new THREE.Mesh(geometry, material);
+    earth.position.set(100, 0, -50);
+
+    scene.add(earth);
+
+}
+
+// function addStar(){
+
+//     const geometry = new THREE.SphereGeometry(0.25, 24, 24);
+//     const material = new THREE.MeshStandardMaterial( { color: 0xffffff })
+//     const star = new THREE.Mesh(geometry, material);
+
+//     const [x, y, z] = Array(3).fill().map(() => THREE.MathUtils.randFloatSpread( 100 ));
+
+//     star.position.set(x, y, z);
+//     scene.add(star);
+
+// }
+
+// Array(200).fill().forEach(addStar);
+
+// const background = new THREE.TextureLoader().load(starBackground);
+// scene.background = background;
+
+function earthRevolution(){
+
+    
+    const a = 50;
+    const b = 40;
+    const angle = Date.now()*0.001;
+
+    const x = a * Math.cos(angle);
+    const z = b * Math.sin(angle);
+
+    earth.position.set(x, 0, z);
+
+}
+
 
 function animate(){
 
@@ -63,10 +100,14 @@ function animate(){
 
     earth.rotation.y += 0.005;
 
+    earthRevolution();
+    
     controls.update();
-
+    
     renderer.render(scene, camera);
-
+    
 }
 
+
+renderEarth();
 animate();
